@@ -1,10 +1,12 @@
 class MemoryGame {
   constructor(cards) {
     this.cards = cards;
-    this.score = 0;
-    this.guessedPairs = 0;
-    this.clickedPairs = 0;
     this.playedCards = [];
+    this.guessedPairs = 0;
+    this.score = 0;
+    this.isFinished = false;
+    this.clickedPairs = 0;
+
     this.shuffleCards();
   }
 
@@ -15,45 +17,57 @@ class MemoryGame {
     }
   }
 
+  /*
+ * An alternative method to shuffle
+ *
+  shuffleCards() {
+    let len = this.cards.length;
+    while (len > 0) {
+      len--;
+      let temp = this.cards[len];
+      let rdmInd = Math.floor(Math.random() * len);
+      this.cards[len] = this.cards[rdmInd];
+      this.cards[rdmInd] = temp;
+    }
+  }
+*/
+
   checkIfPair() {
-    console.log(this.playedCards)
-    if(
-      // alternative syntax this.playedCards[0].getAttribute("data-card-name")
-      this.playedCards[0].dataset.cardName === this.playedCards[1].dataset.cardName
-    ){
-      return true
+    console.log(
+      this.playedCards[0].getAttribute('data-card-name'),
+      this.playedCards[1].getAttribute('data-card-name')
+    );
+    if (
+      this.playedCards[0].getAttribute('data-card-name') ===
+      this.playedCards[1].getAttribute('data-card-name')
+    ) {
+      return true;
     }
-    
   }
 
-  checkIfGameOver() {
-
-    // ------- add other logic here --------
-    // if (this.timer > 60 * 1000) return true
-    // if (this.clickedPairs > 5) return true
-    return this.guessedPairs === this.cards.length / 2
-  
+  checkIfFinished() {
+    if (this.guessedPairs === this.cards.length / 2) this.isFinished = true;
+    return this.isFinished;
   }
 
-  playCard(card){
-    let playResults = { "isPair": false, "playedCards": [] }
-    if(this.playedCards.length < 2){
-      this.playedCards.push(card)
+  playCard(card) {
+    let playResult = { isPair: false, cards: [] };
+    if (this.playedCards.length < 2) {
+      this.playedCards.push(card);
     }
-    
-    if( this.playedCards.length === 2){
-      this.clickedPairs += 1
-      if(this.checkIfPair()){
-        playResults = { "isPair": true, "playedCards": this.playedCards }
-        this.score += 1
-        this.guessedPairs += 1
+    if (this.playedCards.length === 2) {
+      this.clickedPairs += 1;
+      if (this.checkIfPair()) {
+        this.score += 1;
+        playResult = { isPair: true, cards: this.playedCards };
         this.playedCards = [];
-      }else{
-        playResults = { "isPair": false, "playedCards": this.playedCards }
+        this.guessedPairs += 1;
+      } else {
+        playResult = { isPair: false, cards: this.playedCards };
         this.playedCards = [];
       }
     }
-    return playResults
+    return playResult;
   }
 }
 

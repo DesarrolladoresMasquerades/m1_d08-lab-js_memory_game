@@ -26,6 +26,11 @@ const cards = [
   { name: 'thor', img: 'thor.jpg' }
 ];
 
+function flipCard(card) {
+  card.classList.toggle('turned');
+}
+
+function setCardGuessed(card) {
 let memoryGame = new MemoryGame(cards)
 
 const memoryBoard = document.getElementById("memory-board")
@@ -77,7 +82,6 @@ function updateScoresBoard(score, clicked, guessed) {
   document.getElementById('pairs-guessed').innerText = guessed;
 }
 
-
 function gameWon() {
   const winOverlay = document.createElement('div');
   const winBanner = document.createElement('h1');
@@ -89,40 +93,65 @@ function gameWon() {
   document.querySelector('#memory-board').appendChild(winOverlay);
 }
 
+const memoryGame = new MemoryGame(cards);
 
-cardsHTML.forEach(cardHtml => {
-  cardHtml.addEventListener(
-    "click",
+window.addEventListener('load', (event) => {
+  // These actions can only be taken when the page is completely loaded
+  /*
+   *
+   The following code creates a html element that has the following contents
+    <div class="card" data-card-name="${card.name}">
+      <div class="back" name="${card.img}"></div>
+      <div class="front" style="background: url(img/${card.img}) no-repeat"></div>
+    </div>
+  */
+  const cardsHTM = memoryGame.cards.map((card) => {
+    const outsideDiv = document.createElement('div');
+    outsideDiv.classList.add('card');
+    outsideDiv.setAttribute('data-card-name', card.name);
 
-    // ------ main game loop started by user click ---------
-    ( event )=>{
-      const clickedCard = event.currentTarget // ----- only way to know which div was clicked -------
-      flipCard(clickedCard)
+    const insideDivBack = document.createElement('div');
+    insideDivBack.classList.add('back');
+    insideDivBack.name = card.img;
 
-      const playResults = memoryGame.playCard( clickedCard )
+    const insideDivFront = document.createElement('div');
+    insideDivFront.classList.add('front');
+    insideDivFront.style = `background: url(img/${card.img}) no-repeat`;
 
-      // the following line is based on the fact that I would like to pass complex object from the game logic
-      // the object is: { isPair: false, playedCards: this.playedCards }
-      if(playResults.isPair){
-        playResults.playedCards.forEach(card=> setCardsToGuessed(card))
-      }else{
-        playResults.playedCards.forEach( card=>{
-          setTimeout(()=>flipCard(card), 1 * 1000)
-        })
+    outsideDiv.appendChild(insideDivBack);
+    outsideDiv.appendChild(insideDivFront);
+
+    return outsideDiv;
+  });
+
+  // Bind the click event of each element to a callback function
+  cardsHTM.forEach((card) => {
+    // Bind the event listener
+    card.addEventListener('click', (event) => {
+      const card = event.currentTarget;
+      flipCard(card);
+      const playResult = memoryGame.playCard(card);
+      if (playResult.isPair) {
+        playResult.cards.forEach((card) => setCardGuessed(card));
+      } else {
+        playResult.cards.forEach((card) =>
+          setTimeout(() => flipCard(card), 1 * 1000)
+        );
       }
-      
-        updateScoresBoard(
-          memoryGame.score,
-          memoryGame.clickedPairs,
-          memoryGame.guessedPairs
-        )
+      updateScoresBoard(
+        memoryGame.score,
+        memoryGame.clickedPairs,
+        memoryGame.guessedPairs
+      );
 
-        if(memoryGame.checkIfGameOver()) gameWon()
+      if (memoryGame.checkIfFinished()) gameWon();
+    });
+  });
 
-    }
-    // ---------- end game loop --------
-  )
+  // Add all the divs to the HTML
+  const mainBoard = document.querySelector('#memory-board');
 
-  cardsHTML.forEach((cardHtml) => memoryBoard.appendChild(cardHtml));
+  cardsHTM.forEach((cardHTML) => mainBoard.appendChild(cardHTML));
+
 });
 

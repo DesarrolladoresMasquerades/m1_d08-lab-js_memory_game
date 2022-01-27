@@ -15,7 +15,6 @@ body {
   box-shadow: inset 0px 0px 20px -6px #615961;
 }
 
-
 #score {
   background-color: rgba(215, 44, 44, 0.8);
   border-radius: 8px;
@@ -128,4 +127,3 @@ p {
   100% {
     transform: scale(1, 1);
   }
-}
